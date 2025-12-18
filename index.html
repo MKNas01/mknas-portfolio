@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Kabiru Nasiru's Portfolio</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <button id="audio-toggle" class="btn-toggle active">
+      <div class="handle"></div>
+    </button>
+
+    <div id="start-overlay">
+      <div class="start-prompt">
+        <h1>Enter Kabiru's Universe</h1>
+        <p>Click to launch into my world of AI engineering and front-end innovation.</p>
+        <button id="start-btn">Launch</button>
+      </div>
+      <button id="skip-btn" class="skip-btn" title="Skip Intro">
+        &#187; </button>
+    </div>
+
+    <!-- Main Portfolio Carousel (Hidden until transition) -->
+    <div id="portfolio-carousel" class="carousel-container">
+      <button class="nav-btn prev" id="prev-btn">&#8249;</button>
+      <button class="nav-btn next" id="next-btn">&#8250;</button>
+
+      <div class="carousel">
+        <div class="carousel-rotation-direction">
+          <ul class="carousel-item-wrapper" style="--_num-elements: 8">
+            <li class="carousel-item" style="--_index: 1">
+              <div class="project-card about-card">
+                <img src="./Images/Passport.JPG" alt="Kabiru Nasiru" class="profile-photo">
+                <h2>About Me</h2>
+                <p>AI Engineer & Front-End Developer with First Class Honors in Computer Engineering (4.69/5.0 CGPA).</p>
+                <span class="tech">Problem-Solver • Innovator</span>
+                <a href="#" data-modal="about">View Details →</a>
+              </div>
+            </li>
+
+            <li class="carousel-item" style="--_index: 2">
+              <div class="project-card">
+                <h2>PathPilot</h2>
+                <p>AI-powered navigation tool for visually impaired users using Gemini API and Flutter.</p>
+                <span class="tech">Gemini API • Flutter • Computer Vision</span>
+                <a href="#" data-modal="pathpilot">View Details →</a>
+              </div>
+            </li>
+
+            <li class="carousel-item" style="--_index: 3">
+              <div class="project-card">
+                <h2>Tickify</h2>
+                <p>Scalable ticket management app built during HNG Internship.</p>
+                <span class="tech">React • Vue.js • Twig • PHP</span>
+                <a href="#" data-modal="tickify">View Details →</a>
+              </div>
+            </li>
+
+            <li class="carousel-item" style="--_index: 4">
+              <div class="project-card">
+                <h2>Surveillance System</h2>
+                <p>Car theft mitigation system with real-time monitoring.</p>
+                <span class="tech">Next.js • WebSockets • Swagger</span>
+                <a href="#" data-modal="surveillance">View Details →</a>
+              </div>
+            </li>
+
+            <li class="carousel-item" style="--_index: 5">
+              <div class="project-card">
+                <h2>Audiophile E-Commerce</h2>
+                <p>Full-stack e-commerce platform with dynamic filtering.</p>
+                <span class="tech">Next.js • TypeScript • Convex</span>
+                <a href="#" data-modal="audiophile">View Details →</a>
+              </div>
+            </li>
+
+            <li class="carousel-item" style="--_index: 6">
+              <div class="project-card">
+                <h2>Framez Social Media</h2>
+                <p>React Native app for real-time social interactions.</p>
+                <span class="tech">React Native • Convex • Expo</span>
+                <a href="#" data-modal="framez">View Details →</a>
+              </div>
+            </li>
+
+            <li class="carousel-item" style="--_index: 7">
+              <div class="project-card">
+                <h2>Legal Watchdog</h2>
+                <p>AI-driven legal document analyzer and compliance tool.</p>
+                <span class="tech">Gemini API • React • Node.js</span>
+                <a href="#" data-modal="legalwatchdog">View Details →</a>
+              </div>
+            </li>
+
+            <li class="carousel-item" style="--_index: 8">
+              <div class="project-card">
+                <h2>Tourwidget</h2>
+                <p>Interactive tour booking widget with real-time availability.</p>
+                <span class="tech">Vue.js • Firebase • Tailwind CSS</span>
+                <a href="#" data-modal="tourwidget">View Details →</a>
+              </div>
+            </li>
+
+            <li class="carousel-ground"></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div id="details-modal" class="modal-overlay">
+      <div class="modal-content">
+        <button id="close-modal" class="close-btn">&times;</button>
+        <div id="modal-body"></div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

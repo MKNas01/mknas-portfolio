@@ -1,0 +1,666 @@
+/* =========================================
+   1. GLOBAL VARIABLES & RESET
+   ========================================= */
+:root {
+  /* Carousel Physics & Dimensions */
+  --carousel-diameter: 50rem; /* Width of the whole ring */
+  --carousel-item-width: 18rem; /* Card Width */
+  --carousel-item-height: 24rem; /* Card Height */
+  --carousel-3d-perspective: 1000px;
+  --carousel-animation-duration: 25s;
+  
+  /* Colors */
+  --carousel-bg-color-rgb: 0, 0, 0;
+  --carousel-item-glow-color-rgb: 100, 180, 255; 
+  --carousel-transition-duration: 500ms;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body { 
+  margin: 0; 
+  overflow: hidden; 
+  background: #000; 
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+canvas { 
+  display: block; 
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1; /* Behind everything */
+}
+
+/* =========================================
+   2. INTRO OVERLAY (Your Blackhole UI)
+   ========================================= */
+#start-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(0,0,0,0.8) 0%, #000 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  cursor: pointer;
+  transition: opacity 0.5s ease;
+  pointer-events: auto; 
+}
+
+#start-overlay[style*="opacity: 0"],
+#start-overlay[style*="display: none"] {
+  pointer-events: none !important;
+}
+
+.start-prompt {
+  text-align: center;
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: #a0d8ff } 
+}
+
+@keyframes fadeInBtn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.start-prompt h1 {
+  font-size: 3rem;
+  text-shadow: 0 0 10px #fff;
+  
+  overflow: hidden; 
+  border-right: .15em solid transparent; 
+  white-space: nowrap; 
+  margin: 0 auto 1rem;
+  letter-spacing: 0.15em;
+  width: 0; 
+  
+  animation: 
+    typing 2.5s steps(30, end) forwards,
+    blink-caret .75s step-end 4, /* Runs 4 times then vanishes */
+    glow 2s ease-in-out infinite alternate;
+}
+
+/* --- SUBTITLE TYPING --- */
+.start-prompt p {
+  font-size: 1.2rem;
+  margin: 0 auto 2rem;
+  opacity: 0.8;
+  color: #a0d8ff;
+  
+  overflow: hidden;
+  /* CHANGE: Start with transparent cursor */
+  border-right: .15em solid transparent;
+  white-space: nowrap;
+  width: 0; 
+  
+  animation: 
+    typing 3s steps(40, end) 2.5s forwards,
+    blink-caret .75s step-end 2.5s 5; /* Delays 2.5s, runs 5 times, then vanishes */
+}
+
+/* --- BUTTON FADE IN --- */
+#start-btn {
+  background: #333;
+  border: 2px solid #fff;
+  color: #fff;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: all 0.3s;
+  pointer-events: auto;
+  opacity: 0;
+  
+  animation: fadeInBtn 1s ease 5.5s forwards;
+}
+
+#start-btn:hover {
+  background: #fff;
+  color: #000;
+  box-shadow: 0 0 20px #fff;
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 10px #fff; }
+  to { text-shadow: 0 0 20px #fff, 0 0 30px #fff; }
+}
+
+/* =========================================
+   3. PORTFOLIO CONTAINER (The Stage)
+   ========================================= */
+#portfolio-carousel {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 1.5s ease-out;
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  
+  /* Flex centering for the whole 3D engine */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; /* Disabled until revealed */
+}
+
+#portfolio-carousel.revealed {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* =========================================
+   4. 3D CAROUSEL ENGINE
+   ========================================= */
+.carousel {
+  width: var(--carousel-diameter);
+  height: var(--carousel-diameter);
+  position: relative;
+  perspective: var(--carousel-3d-perspective);
+  /* FIX 1: Center the camera view so it doesn't look "moved up" */
+  perspective-origin: 50% 50%; 
+  transform-style: preserve-3d;
+}
+
+/* Add smooth transition for the manual rotation */
+.carousel-rotation-direction {
+  transform: translateZ(-35rem) rotateY(0deg); 
+  transform-style: preserve-3d;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Navigation Buttons */
+.nav-btn {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(100, 180, 255, 0.1);
+  border: 1px solid rgba(100, 180, 255, 0.5);
+  color: #a0d8ff;
+  font-size: 2rem;
+  padding: 1rem;
+  cursor: pointer;
+  z-index: 100; /* Above the carousel */
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  pointer-events: auto;
+}
+
+.nav-btn:hover {
+  background: rgba(100, 180, 255, 0.4);
+  box-shadow: 0 0 20px rgba(100, 180, 255, 0.6);
+  color: white;
+}
+
+.nav-btn.prev { left: 5%; }
+.nav-btn.next { right: 5%; }
+
+.carousel-item-wrapper {
+  list-style: none;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+/* =========================================
+   5. INDIVIDUAL SLOTS (The Math)
+   ========================================= */
+.carousel-item {
+  position: absolute;
+  width: var(--carousel-item-width);
+  height: var(--carousel-item-height);
+  
+  --_angle: calc(360deg / var(--_num-elements) * var(--_index));
+  --_radius: calc(var(--carousel-diameter) / 2);
+  
+  left: 50%;
+  top: 50%;
+  
+  transform: 
+    translate(-50%, -50%) 
+    rotateY(var(--_angle)) 
+    translateZ(var(--_radius));
+    
+  transform-style: preserve-3d;
+  transition: transform var(--carousel-transition-duration);
+  
+  pointer-events: auto; 
+}
+
+.carousel-item:hover {
+  transform: 
+    translate(-50%, -50%) 
+    rotateY(var(--_angle)) 
+    translateZ(calc(var(--_radius) * 1.1)); 
+  z-index: 100;
+}
+
+/* =========================================
+   6. PROJECT CARD STYLING (The Look)
+   ========================================= */
+.project-card {
+  width: 100%;
+  height: 100%;
+  padding: 1.5rem;
+  
+  /* Glassmorphism Base */
+  background: rgba(15, 20, 40, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(100, 180, 255, 0.3); /* Subtle border initially */
+  border-radius: 1rem;
+  
+  /* Content Layout */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+  
+  /* Initial Shadow */
+  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+  transition: all 0.3s ease;
+  
+  /* Ensure 3D rendering doesn't block interactions */
+  backface-visibility: visible; 
+  transform-style: preserve-3d;
+}
+
+/* About Card Specific Styles */
+.about-card .profile-photo {
+  width: 100%;
+  max-height: 50%;
+  object-fit: cover;
+  object-position: 50% 12%;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.carousel-item:hover .project-card {
+  background: rgba(20, 30, 60, 0.95);
+  border-color: rgba(100, 180, 255, 0.8);
+  box-shadow: 0 0 30px rgba(100, 180, 255, 0.6);
+}
+
+.project-card h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #a0d8ff;
+  text-shadow: 0 0 10px rgba(160, 216, 255, 0.5);
+  transition: color 0.3s;
+}
+
+.carousel-item:hover .project-card h2 {
+  color: #fff;
+  text-shadow: 0 0 20px rgba(160, 216, 255, 0.8);
+}
+
+.project-card p {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin-bottom: 1rem;
+  opacity: 0.9;
+}
+
+.project-card .tech {
+  font-size: 0.8rem;
+  color: #ccc;
+  font-style: italic;
+  margin-bottom: 1rem;
+}
+
+.project-card a {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  background: rgba(100, 180, 255, 0.15);
+  border: 1px solid rgba(100, 180, 255, 0.4);
+  color: #a0d8ff;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: all 0.2s ease-in-out;
+  
+  /* FORCE POINTER */
+  cursor: pointer !important;
+  position: relative; 
+  z-index: 1000;
+}
+
+/* Hover State */
+.project-card a:hover {
+  background: rgba(100, 180, 255, 0.6);
+  box-shadow: 0 0 15px rgba(100, 180, 255, 0.8);
+  color: #fff;
+  border-color: transparent;
+  transform: translateY(-2px);
+}
+
+/* =========================================
+   7. GROUND REFLECTION (Optional)
+   ========================================= */
+.carousel-ground {
+  position: absolute;
+  width: var(--carousel-diameter);
+  height: var(--carousel-diameter);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotateX(90deg) translateZ(calc(var(--carousel-item-height) / -1.5));
+  background: radial-gradient(rgba(100, 180, 255, 0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* =========================================
+   8. INTERACTION PATCH (The Drill-Through Fix)
+   ========================================= */
+
+/* 1. IGNORE THE CONTAINERS */
+/* Tell browser: "Don't click these layers, look deeper" */
+#portfolio-carousel,
+.carousel,
+.carousel-rotation-direction,
+.carousel-item-wrapper {
+  pointer-events: none !important;
+}
+
+/* 2. ENABLE THE ITEMS */
+/* Tell browser: "These specific items are clickable" */
+.carousel-item,
+.nav-btn {
+  pointer-events: auto !important;
+}
+
+/* 3. FIX TEXT SELECTION */
+/* Allow users to highlight text on the cards */
+.project-card {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  cursor: default;
+}
+
+/* 4. ENSURE BUTTONS ARE CLICKABLE */
+.project-card a {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+/* =========================================
+   9. AUDIO TOGGLE BUTTON
+   ========================================= */
+#audio-toggle {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  z-index: 3000; /* Must be higher than #start-overlay (2000) */
+  
+  /* Size (Matches the "Large" example) */
+  width: 5rem;
+  height: 2.5rem;
+  border-radius: 2.5rem;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  
+  /* Default "OFF" State Colors */
+  background: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: visible; /* Allow text labels to stick out if needed */
+}
+
+/* "ON" State Colors (Your Theme) */
+#audio-toggle.active {
+  background: rgba(100, 180, 255, 0.4); /* Cyan tint */
+  border-color: #a0d8ff;
+  box-shadow: 0 0 15px rgba(100, 180, 255, 0.5);
+}
+
+/* The Sliding Circle (Handle) */
+#audio-toggle .handle {
+  position: absolute;
+  top: 0.2rem;
+  left: 0.2rem;
+  width: 1.8rem; /* Fit inside the 2.5rem height */
+  height: 1.8rem;
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+/* Move Handle when Active */
+#audio-toggle.active .handle {
+  left: 2.7rem; /* Slide to the right */
+  background: #fff;
+  box-shadow: 0 0 10px #fff;
+}
+
+/* Text Labels (Pseudo-elements) */
+#audio-toggle::before,
+#audio-toggle::after {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  font-weight: bold;
+  font-family: 'Segoe UI', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: white;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+
+/* "OFF" Label */
+#audio-toggle::before {
+  content: 'OFF';
+  right: 1rem;
+  opacity: 0.5;
+}
+
+/* "ON" Label */
+#audio-toggle::after {
+  content: 'ON';
+  left: 0.8rem;
+  opacity: 0;
+}
+
+/* Toggle Text Visibility */
+#audio-toggle.active::before { opacity: 0; }
+#audio-toggle.active::after { opacity: 1; text-shadow: 0 0 8px #a0d8ff; }
+
+/* =========================================
+   10. MODAL STYLES
+   ========================================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+  display: flex;
+  opacity: 1;
+}
+
+.modal-content {
+  background: rgba(20, 30, 60, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(100, 180, 255, 0.8);
+  border-radius: 1rem;
+  padding: 2rem;
+  max-width: 600px;
+  width: 90%;
+  position: relative;
+  box-shadow: 0 0 30px rgba(100, 180, 255, 0.6);
+  color: white;
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+.close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: #a0d8ff;
+  font-size: 2rem;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.close-btn:hover {
+  color: #fff;
+}
+
+#modal-body h2 {
+  color: #a0d8ff;
+  margin-bottom: 1rem;
+}
+
+#modal-body p {
+  margin-bottom: 1rem;
+}
+
+#modal-body ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+#modal-body a {
+  color: #a0d8ff;
+  text-decoration: underline;
+}
+
+#modal-body a:hover {
+  color: #fff;
+}
+
+/* =========================================
+   11. MODAL ANIMATIONS & POLISH
+   ========================================= */
+
+/* ZOOM ENTRANCE ANIMATION */
+@keyframes modalZoom {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* When the modal is active, animate the content box */
+.modal-overlay.active .modal-content {
+  animation: modalZoom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  /* The bezier curve gives it a subtle "bounce" effect */
+}
+
+/* TYPING CURSOR FOR MODAL TITLE */
+.modal-typing-cursor {
+  display: inline-block;
+  width: 0.5rem;
+  height: 1.2em;
+  background-color: #a0d8ff;
+  margin-left: 5px;
+  vertical-align: text-bottom;
+  animation: blink-caret 0.75s step-end infinite;
+}
+
+/* Ensure the title container aligns the cursor correctly */
+#modal-body h2 {
+  display: inline-flex;
+  align-items: center;
+  white-space: pre-wrap; /* Preserve spaces */
+}
+
+/* =========================================
+   12. SKIP BUTTON & ANIMATION
+   ========================================= */
+.skip-btn {
+  position: absolute; /* Positioned relative to overlay */
+  bottom: 3rem;
+  right: 3rem;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  
+  /* Glassmorphism Theme */
+  background: rgba(15, 20, 40, 0.6); 
+  border: 1px solid rgba(100, 180, 255, 0.4);
+  color: #a0d8ff;
+  backdrop-filter: blur(4px);
+  
+  /* Layout */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem; /* Size of the arrow */
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 2005; /* Above background, below modal */
+  pointer-events: auto;
+}
+
+.skip-btn:hover {
+  background: rgba(100, 180, 255, 0.2);
+  border-color: #fff;
+  color: #fff;
+  box-shadow: 0 0 20px rgba(100, 180, 255, 0.4);
+  
+  /* The Wiggle Animation */
+  animation: wiggle 2s ease infinite;
+}
+
+@keyframes wiggle {
+  0% { transform: rotate(0deg); }
+  80% { transform: rotate(0deg); }
+  85% { transform: rotate(15deg); }
+  95% { transform: rotate(-15deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* Hide Skip Button on Mobile Landscape if needed, 
+   or adjust margins for smaller screens */
+@media (max-width: 768px) {
+  .skip-btn {
+    bottom: 2rem;
+    right: 2rem;
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+}
