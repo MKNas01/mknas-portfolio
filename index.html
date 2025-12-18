@@ -2,6 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link
+      rel="preload"
+      href="Audios/PS2_startup_screen_sound.mp3"
+      as="audio"
+      type="audio/mpeg"
+    />
     <title>Kabiru Nasiru's Portfolio</title>
     <link rel="stylesheet" href="style.css" />
   </head>
@@ -13,11 +19,13 @@
     <div id="start-overlay">
       <div class="start-prompt">
         <h1>Enter Kabiru's Universe</h1>
-        <p>Click to launch into my world of AI engineering and front-end innovation.</p>
+        <p>
+          Click to launch into my world of AI engineering and front-end
+          innovation.
+        </p>
         <button id="start-btn">Launch</button>
       </div>
-      <button id="skip-btn" class="skip-btn" title="Skip Intro">
-        &#187; </button>
+      <button id="skip-btn" class="skip-btn" title="Skip Intro">&#187;</button>
     </div>
 
     <!-- Main Portfolio Carousel (Hidden until transition) -->
@@ -30,9 +38,16 @@
           <ul class="carousel-item-wrapper" style="--_num-elements: 8">
             <li class="carousel-item" style="--_index: 1">
               <div class="project-card about-card">
-                <img src="./Images/Passport.JPG" alt="Kabiru Nasiru" class="profile-photo">
+                <img
+                  src="./Images/Passport.JPG"
+                  alt="Kabiru Nasiru"
+                  class="profile-photo"
+                />
                 <h2>About Me</h2>
-                <p>AI Engineer & Front-End Developer with First Class Honors in Computer Engineering (4.69/5.0 CGPA).</p>
+                <p>
+                  AI Engineer & Front-End Developer with First Class Honors in
+                  Computer Engineering (4.69/5.0 CGPA).
+                </p>
                 <span class="tech">Problem-Solver • Innovator</span>
                 <a href="#" data-modal="about">View Details →</a>
               </div>
@@ -41,7 +56,10 @@
             <li class="carousel-item" style="--_index: 2">
               <div class="project-card">
                 <h2>PathPilot</h2>
-                <p>AI-powered navigation tool for visually impaired users using Gemini API and Flutter.</p>
+                <p>
+                  AI-powered navigation tool for visually impaired users using
+                  Gemini API and Flutter.
+                </p>
                 <span class="tech">Gemini API • Flutter • Computer Vision</span>
                 <a href="#" data-modal="pathpilot">View Details →</a>
               </div>
@@ -50,7 +68,9 @@
             <li class="carousel-item" style="--_index: 3">
               <div class="project-card">
                 <h2>Tickify</h2>
-                <p>Scalable ticket management app built during HNG Internship.</p>
+                <p>
+                  Scalable ticket management app built during HNG Internship.
+                </p>
                 <span class="tech">React • Vue.js • Twig • PHP</span>
                 <a href="#" data-modal="tickify">View Details →</a>
               </div>
@@ -95,7 +115,9 @@
             <li class="carousel-item" style="--_index: 8">
               <div class="project-card">
                 <h2>Tourwidget</h2>
-                <p>Interactive tour booking widget with real-time availability.</p>
+                <p>
+                  Interactive tour booking widget with real-time availability.
+                </p>
                 <span class="tech">Vue.js • Firebase • Tailwind CSS</span>
                 <a href="#" data-modal="tourwidget">View Details →</a>
               </div>
